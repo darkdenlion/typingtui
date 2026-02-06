@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Launch typing TUI using the bundled venv — no activation needed.
+SOURCE="$0"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
+exec "$DIR/.venv/bin/python" "$DIR/typing_tui.py" "$@"

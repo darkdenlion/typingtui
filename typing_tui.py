@@ -191,7 +191,7 @@ MODES = ["words", "quotes", "code tokens", "hacker"]
 
 THEMES: Dict[str, Dict[str, str]] = {
     "slate": {
-        "screen_bg": "#0b0f14",
+        "screen_bg": "transparent",
         "card_bg": "#111827",
         "stats_bg": "#0f172a",
         "prompt_bg": "#0b1220",
@@ -211,7 +211,7 @@ THEMES: Dict[str, Dict[str, str]] = {
         "bar_bg": "#1e293b",
     },
     "ember": {
-        "screen_bg": "#130c0a",
+        "screen_bg": "transparent",
         "card_bg": "#1f140f",
         "stats_bg": "#21140e",
         "prompt_bg": "#1a1210",
@@ -231,7 +231,7 @@ THEMES: Dict[str, Dict[str, str]] = {
         "bar_bg": "#3b1d14",
     },
     "mint": {
-        "screen_bg": "#07161a",
+        "screen_bg": "transparent",
         "card_bg": "#0b1f24",
         "stats_bg": "#0b1c22",
         "prompt_bg": "#0a1b1f",
@@ -359,7 +359,7 @@ class HelpBar(Static):
 class TypingTUI(App):
     CSS = """
     Screen {
-        background: #0b0f14;
+        background: transparent;
     }
 
     #root {
