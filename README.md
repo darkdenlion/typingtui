@@ -49,7 +49,7 @@ python typing_tui.py
 ### Keyboard Shortcuts
 
 - `Ctrl+R` - Restart the current session
-- `Ctrl+M` - Cycle through modes (words → quotes → code tokens → hacker)
+- `Ctrl+N` - Cycle through modes (words → quotes → code tokens → hacker)
 - `Ctrl+D` - Cycle through difficulty levels (easy → normal → hard)
 - `Ctrl+T` - Cycle through themes (slate → ember → mint → ...)
 - `Ctrl+Q` - Quit the application

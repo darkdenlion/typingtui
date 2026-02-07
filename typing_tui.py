@@ -51,7 +51,7 @@ def sys_platform() -> str:
 
 
 SCORES_PATH = _default_data_dir() / "scores.json"
-CONFIG_PATH = Path.cwd() / "typing_tui.config.json"
+CONFIG_PATH = Path(__file__).resolve().parent / "typing_tui.config.json"
 
 
 @dataclass
@@ -64,6 +64,11 @@ class ScoreEntry:
     words_done: int
     words_correct: int
     words_wrong: int
+    mode: str = "words"
+    difficulty: str = "normal"
+
+
+_SCORE_FIELDS = {f.name for f in __import__("dataclasses").fields(ScoreEntry)}
 
 
 def load_scores() -> List[ScoreEntry]:
@@ -75,12 +80,14 @@ def load_scores() -> List[ScoreEntry]:
                 words_correct = int(row.get("words_done", 0)) - int(row.get("words_wrong", 0))
                 row["words_correct"] = max(0, words_correct)
                 row["words_wrong"] = int(row.get("words_wrong", 0))
-            out.append(ScoreEntry(**row))
+            # Filter to known fields so extra/future keys don't crash
+            filtered = {k: v for k, v in row.items() if k in _SCORE_FIELDS}
+            out.append(ScoreEntry(**filtered))
         return out
     except FileNotFoundError:
         return []
     except Exception:
-        # if file is corrupted, don’t crash; start fresh
+        # if file is corrupted, don't crash; start fresh
         return []
 
 
@@ -139,7 +146,7 @@ CODE_TOKENS = [
     "if", "elif", "else", "for", "while", "break", "continue", "with", "as",
     "print()", "len()", "range()", "dict", "list", "set", "tuple", "str", "int",
     "==", "!=", ">=", "<=", "->", "=>", "+=", "-=", "*=", "/=", "::", "//",
-    "()", "[]", "{}", "{}", "0", "1", "2", "10", "42", "3.14", "0xFF",
+    "()", "[]", "{}", "0", "1", "2", "10", "42", "3.14", "0xFF",
     "snake_case", "camelCase", "kebab-case", "api/v1", "node.js", "user_id",
 ]
 
@@ -409,7 +416,7 @@ class TypingTUI(App):
     BINDINGS = [
         ("ctrl+q", "quit", "Quit"),
         ("ctrl+r", "restart", "Restart"),
-        ("ctrl+m", "cycle_mode", "Mode"),
+        ("ctrl+n", "cycle_mode", "Mode"),
         ("ctrl+d", "cycle_difficulty", "Difficulty"),
         ("ctrl+t", "cycle_theme", "Theme"),
     ]
@@ -603,6 +610,8 @@ class TypingTUI(App):
             words_done=words_done,
             words_correct=words_correct,
             words_wrong=words_wrong,
+            mode=self.mode,
+            difficulty=self.difficulty,
         )
 
         scores = load_scores()
@@ -709,6 +718,10 @@ class TypingTUI(App):
         self._render_prompt()
         self._render_stats()
 
+    def _scores_for_current(self, scores: List[ScoreEntry]) -> List[ScoreEntry]:
+        """Filter scores to the current mode and difficulty."""
+        return [s for s in scores if s.mode == self.mode and s.difficulty == self.difficulty]
+
     def _render_all(self) -> None:
         scores = load_scores()
         self._render_scorebar(scores=scores)
@@ -748,9 +761,10 @@ class TypingTUI(App):
         if scores is None:
             scores = load_scores()
 
-        top = scores[:3]
-        best = scores[0] if scores else None
-        last_run = last or self._latest_score(scores)
+        scoped = self._scores_for_current(scores)
+        top = scoped[:3]
+        best = scoped[0] if scoped else None
+        last_run = last or self._latest_score(scoped)
         theme = self.palette
         text = Text()
         text.append("Top scores", style=f"bold {theme['title']}")
@@ -871,7 +885,7 @@ class TypingTUI(App):
             text.append("Time's up. ", style=theme["hint"])
         text.append("Ctrl+R restart", style=theme["hint"])
         text.append("  ", style=theme["muted"])
-        text.append("Ctrl+M mode", style=theme["hint"])
+        text.append("Ctrl+N mode", style=theme["hint"])
         text.append("  ", style=theme["muted"])
         text.append("Ctrl+D difficulty", style=theme["hint"])
         text.append("  ", style=theme["muted"])
